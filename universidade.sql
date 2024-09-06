@@ -35,7 +35,7 @@ CREATE TABLE `departamento` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Despejando dados para a tabela `departamento`
+-- Inserindo dados para a tabela `departamento`
 --
 
 INSERT INTO `departamento` (`nome`, `sigla`, `codigo`, `coordenador`) VALUES
@@ -58,7 +58,7 @@ CREATE TABLE `dependente` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Despejando dados para a tabela `dependente`
+-- Inserindo dados para a tabela `dependente`
 --
 
 INSERT INTO `dependente` (`nome`, `datanasc`, `sexo`, `RG`, `matricProf`) VALUES
@@ -81,7 +81,7 @@ CREATE TABLE `email` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Despejando dados para a tabela `email`
+-- Inserindo dados para a tabela `email`
 --
 
 INSERT INTO `email` (`matricProf`, `email`) VALUES
@@ -111,7 +111,7 @@ CREATE TABLE `professor` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Despejando dados para a tabela `professor`
+-- Inserindo dados para a tabela `professor`
 --
 
 INSERT INTO `professor` (`nome`, `sNome`, `matricula`, `datanasc`, `sexo`, `salario`, `matric_represent_area`, `depto`) VALUES
@@ -138,7 +138,7 @@ CREATE TABLE `projeto` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Despejando dados para a tabela `projeto`
+-- Inserindo dados para a tabela `projeto`
 --
 
 INSERT INTO `projeto` (`nome`, `codigo`, `depto`, `duracao`) VALUES
@@ -212,3 +212,168 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+/*
+   1) Exiba o nome, o RG e a data de nascimento de todos os dependentes do sexo feminino.
+*/
+
+SELECT * FROM dependente
+
+SELECT nome, RG, datanasc
+FROM dependente
+WHERE sexo = 'F';
+
+/*
+   2) Relacione em ordem decrescente os (diferentes) salários dos professores da instituição.
+*/
+
+SELECT * FROM professor
+
+SELECT *
+FROM professor
+ORDER BY salario DESC;
+
+/*
+   3) Atualize o nome do projeto “Aplicações BD” para “Aplicações de Big Data”.
+*/
+
+SELECT * FROM projeto
+
+UPDATE Projeto
+SET nome = 'Aplicações de Big Data'
+WHERE codigo = 7894;
+
+/*
+   4) Exiba a matrícula e o nome dos professores que nasceram a partir de 1970, ordenados
+	pelo nome em ordem ascendente.
+*/
+
+SELECT * FROM professor
+
+SELECT *
+FROM professor
+WHERE datanasc >= 19700101
+ORDER BY nome ASC;
+
+/*
+   5) Exiba em ordem decrescente da data de nascimento todos os dados dos professores que
+	nasceram na década de 80 e que têm Pereira no sobrenome.
+*/
+
+SELECT * FROM professor
+
+SELECT * 
+FROM professor
+WHERE datanasc BETWEEN 1980010 AND 19891231
+AND sNome LIKE '%Pereira%'
+ORDER BY datanasc DESC;
+
+/*
+   6) Exiba o nome, sobrenome e matrícula dos professores que são representantes de área;
+*/
+
+SELECT * FROM professor
+
+SELECT *
+FROM professor
+WHERE matric_represent_area IS NOT null;
+
+/*
+   7) Exiba o nome e a data de nascimento do dependente mais jovem.
+*/
+
+SELECT * FROM dependente
+
+SELECT nome, datanasc
+FROM dependente
+WHERE datanasc = (SELECT MAX(datanasc) FROM dependente);
+
+/*
+   8) Exibir a matrícula e o nome de todas as professoras que tenham Maria em qualquer parte
+	do nome ordenados pelo nome em ordem decrescente.
+*/
+
+SELECT * FROM professor
+
+SELECT matricula, nome
+FROM professor
+WHERE nome LIKE '%Maria%' AND SEXO = 'F'
+ORDER BY nome DESC;
+
+/*
+   9) Exiba nome, sobrenome dos empregados cuja segunda letra do nome é “O” e tenha
+	“Campos” no sobrenome;
+*/
+
+SELECT * FROM professor
+
+SELECT nome, sNome
+FROM professor
+WHERE nome LIKE '_O%' AND sNome LIKE '%Campos%'
+
+/*
+   10) Para cada departamento, exiba o código do departamento e a quantidade de projetos lá
+	alocados.
+*/
+
+SELECT * FROM projeto
+
+SELECT depto, COUNT(*) AS quantidade
+FROM projeto
+GROUP BY depto
+
+
+/*
+   11) Exiba o nome e o código dos departamentos que têm mais de 2 professores nele
+	lotados.
+*/
+
+SELECT * FROM professor
+
+SELECT p.depto, COUNT(*) AS quantidade, (SELECT d.nome FROM departamento d where d.codigo = p.depto) AS nome_departamento
+FROM professor p 
+GROUP BY p.depto
+
+
+/*
+   12) Selecione o nome, o sobrenome e a matrícula dos professores que trabalham no
+	Departamento de Tecnologia em Telemática.
+*/
+
+SELECT * FROM professor
+
+SELECT nome, sNome, matricula
+FROM professor
+WHERE depto = 121;
+
+
+/*
+   13) Exiba o e-mail do professor cujo nome é João Carlos.
+*/
+
+SELECT * FROM email
+
+SELECT email
+FROM email e
+WHERE matricProf = (SELECT matricula FROM professor p where p.matricula = e.matricProf AND nome = "João Carlos" ) 
+
+/*
+   14) Exiba o nome do(a) coordenador(a) do Departamento de Engenharia de Computação
+*/
+
+SELECT * FROM professor
+
+SELECT nome
+FROM professor
+WHERE depto = 125 AND matric_represent_area IS null;
+
+/*
+   15) Exiba os nomes dos professores que não têm dependentes.
+*/
+
+SELECT * FROM professor
+
+SELECT matricula, nome
+FROM professor p
+WHERE matricula NOT IN (SELECT matricProf FROM dependente d)
