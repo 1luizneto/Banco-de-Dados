@@ -1,4 +1,4 @@
-## PROJETO UNIVERSIDADE SQL
+## PROJETO UNIVERSIDADE EM SQL
 
 Tomando como base os esquemas de relação do Banco de Dados representado abaixo, realize as consultas a seguir:
 
